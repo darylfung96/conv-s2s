@@ -3,10 +3,12 @@ import torch.nn.functional as F
 
 import math
 
+from embedding_position import EmbeddingPosition
+
 
 class ConvEncoder(nn.Module):
 
-    def __init__(self, vocab_size, hidden_size, kernel_size, num_layers, dropout, training):
+    def __init__(self, vocab_size, max_length, hidden_size, kernel_size, num_layers, dropout, training):
         super(ConvEncoder, self).__init__()
 
         self._embedding_size = 512
@@ -18,9 +20,7 @@ class ConvEncoder(nn.Module):
         self.is_training = training
 
         self.embedding = nn.Embedding(vocab_size, self._embedding_size)
-
-        #TODO create embedding position
-        # self.embedding_pos = nn.Embedding()
+        self.embedding_pos = EmbeddingPosition(max_length, self._embedding_size)
         self.fc1 = nn.Linear(self._embedding_size, self._hidden_size)
         self.fc2 = nn.Linear(self._hidden_size, self._embedding_size)
         self.kernel_size = kernel_size
@@ -29,7 +29,7 @@ class ConvEncoder(nn.Module):
     def forward(self, input):
 
         # embedding
-        embedded_input = self.embedding(input) # + self.embedding_position(input)
+        embedded_input = self.embedding(input) + self.embedding_position(input)
         embedded_input = F.dropout(embedded_input, p=self._dropout, training=self.is_training)
 
         fc1_output = self.fc1(embedded_input)

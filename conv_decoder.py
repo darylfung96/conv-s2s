@@ -3,11 +3,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from embedding_position import EmbeddingPosition
+
 
 class ConvDecoder(nn.Module):
-    def __init__(self, vocab_size, hidden_size, embedding_size, kernel_size, num_layers, dropout, is_training):
+    def __init__(self, vocab_size, max_length, hidden_size, embedding_size, kernel_size, num_layers, dropout, is_training):
         super(ConvDecoder, self).__init__()
         self._vocab_size = vocab_size
+        self._max_length = max_length
         self._hidden_size = hidden_size
         self._embedding_size = embedding_size
         self._kernel_size = kernel_size
@@ -21,7 +24,7 @@ class ConvDecoder(nn.Module):
         self.fc3 = nn.Linear(embedding_size, vocab_size)
 
     def forward(self, previous_decoded_input, encoder_outputs, encoder_attention):
-        embedded_output = nn.Embedding(previous_decoded_input, self._embedding_size) # + position embedding
+        embedded_output = nn.Embedding(previous_decoded_input, self._embedding_size) + EmbeddingPosition(self._max_length, self._embedding_size)
         embedded_output = F.dropout(embedded_output, p=self._dropout, training=self._is_training)
 
         layer_output = self.fc1(embedded_output)
