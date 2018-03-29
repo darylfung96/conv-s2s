@@ -10,8 +10,7 @@ to sequence learning. I decided to try and reimplement the model.
 
 
 TODO:
-- Encoder
-- Decoder
+- Decoder(halfway)
 - Data gathering
 - Data preprocess
 - train
