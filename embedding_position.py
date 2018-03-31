@@ -8,6 +8,8 @@ class EmbeddingPosition(nn.Embedding):
     def forward(self, input):
         for row in input:
             for index in range(len(row)):
+                if input[row][index] == 0:
+                    break
                 input[row][index] = index+1
 
         super(EmbeddingPosition, self).forward(input)
