@@ -8,16 +8,16 @@ from embedding_position import EmbeddingPosition
 
 class ConvEncoder(nn.Module):
 
-    def __init__(self, vocab_size, max_length, hidden_size, kernel_size, num_layers, dropout, training):
+    def __init__(self, vocab_size, max_length, hidden_size, embedding_size, kernel_size, num_layers, dropout, is_training):
         super(ConvEncoder, self).__init__()
 
-        self._embedding_size = 512
+        self._embedding_size = embedding_size
         self._vocab_size = vocab_size
         self._hidden_size = hidden_size
         self._conv_out_channels = 2 * self._hidden_size
         self._num_layers = num_layers
         self._dropout = dropout
-        self.is_training = training
+        self.is_training = is_training
 
         self.embedding = nn.Embedding(vocab_size, self._embedding_size)
         self.embedding_pos = EmbeddingPosition(max_length, self._embedding_size)
