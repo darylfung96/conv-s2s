@@ -6,6 +6,7 @@ class EmbeddingPosition(nn.Embedding):
         super(EmbeddingPosition, self).__init__(max_length, embedding_dim)
 
     def forward(self, input):
+        #TODO create a variable that actually get changed with the position value
         for row in input:
             for index in range(len(row)):
                 if input[row][index] == 0:

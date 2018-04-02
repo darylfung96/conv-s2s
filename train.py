@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import string
+import numpy as np
 
 from seq2seq import Seq2seq
 from conv_encoder import ConvEncoder
@@ -38,7 +39,7 @@ for index in range(len(examples)):
             index_to_word[len(index_to_word)] = splitted[text_index]
             splitted[text_index] = len(word_to_index)
         else:
-            splitted[text_index] = word_to_index.get(text_index)
+            splitted[text_index] = word_to_index.get(splitted[text_index])
 
     examples[index] = splitted
 
@@ -52,14 +53,19 @@ for index in range(len(examples_target)):
             index_to_word[len(index_to_word)] = splitted[text_index]
             splitted[text_index] = len(word_to_index)
         else:
-            splitted[text_index] = word_to_index.get(text_index)
+            splitted[text_index] = word_to_index.get(splitted[text_index])
 
-    examples[index] = splitted
+        examples_target[index] = splitted
 
 
+examples = [np.pad(example, [0, max_length-len(example)], mode='constant') for example in examples]
 
 conv_encoder = ConvEncoder(len(word_to_index), max_length, hidden_size=128, embedding_size=512, kernel_size=2, num_layers=3, dropout=0.5, is_training=True)
 conv_decoder = ConvDecoder(len(word_to_index), max_length, hidden_size=128, embedding_size=512, kernel_size=2, num_layers=3, dropout=0.5, is_training=True)
 
+
+import torch
+from torch.autograd import Variable
 seq2seq = Seq2seq(conv_encoder, conv_decoder)
-#seq2seq()
+examples = Variable(torch.from_numpy(np.array(examples)))
+seq2seq(examples)
