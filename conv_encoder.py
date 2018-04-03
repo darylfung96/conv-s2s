@@ -43,7 +43,7 @@ class ConvEncoder(nn.Module):
             fc1_output = fc1_output.transpose(1, 2)
 
             conv_output = self.conv(fc1_output)
-            glu_output = F.glu(conv_output, 2)
+            glu_output = F.glu(conv_output, 2) #TODO fix this
 
             layer_output = (glu_output + residual_output) * math.sqrt(0.5) # scale value
 
