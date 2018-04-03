@@ -8,5 +8,15 @@ class EmbeddingPosition(nn.Embedding):
         super(EmbeddingPosition, self).__init__(max_length, embedding_dim)
 
     def forward(self, inputs: Variable):
-        inputs = inputs.nonzero()
-        super(EmbeddingPosition, self).forward(inputs)
+
+        for row_index in range(len(inputs.data)):
+            for col_index in range(len(inputs.data[row_index])):
+                # change the value to the absolute position
+                if inputs.data[row_index][col_index] != 0:
+                    inputs.data[row_index][col_index] = col_index+1
+                else:
+                    break
+
+
+
+        return super(EmbeddingPosition, self).forward(inputs)

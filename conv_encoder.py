@@ -20,7 +20,7 @@ class ConvEncoder(nn.Module):
         self.is_training = is_training
 
         self.embedding = nn.Embedding(vocab_size, self._embedding_size)
-        self.embedding_position = EmbeddingPosition(max_length, self._embedding_size)
+        self.embedding_position = EmbeddingPosition(max_length+1, self._embedding_size) # max_length + 1 to include the padding placeholders
         self.fc1 = nn.Linear(self._embedding_size, self._hidden_size)
         self.fc2 = nn.Linear(self._hidden_size, self._embedding_size)
         self.kernel_size = kernel_size
@@ -40,8 +40,9 @@ class ConvEncoder(nn.Module):
             residual_output = layer_output
 
             fc1_output = F.dropout(fc1_output, p=self._dropout)
+            fc1_output = fc1_output.transpose(1, 2)
 
-            conv_output = self.conv(embedded_input)
+            conv_output = self.conv(fc1_output)
             glu_output = F.glu(conv_output, 2)
 
             layer_output = (glu_output + residual_output) * math.sqrt(0.5) # scale value
