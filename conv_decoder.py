@@ -18,13 +18,16 @@ class ConvDecoder(nn.Module):
         self._dropout = dropout
         self._is_training = is_training
 
+        self.embedding = nn.Embedding(vocab_size, self._embedding_size)
+        self.embedding_position = EmbeddingPosition(self._max_length+1, self._embedding_size) # + 1 to include padding which act as none
+
         self.fc1 = nn.Linear(embedding_size, hidden_size)
         self.conv = nn.Conv1d(hidden_size, 2 * hidden_size, kernel_size)
         self.fc2 = nn.Linear(hidden_size, embedding_size)
         self.fc3 = nn.Linear(embedding_size, vocab_size)
 
     def forward(self, previous_decoded_input, encoder_outputs, encoder_attention):
-        embedded_output = nn.Embedding(previous_decoded_input, self._embedding_size) + EmbeddingPosition(self._max_length, self._embedding_size)
+        embedded_output = self.embedding(previous_decoded_input) + self.embedding_position(previous_decoded_input)
         embedded_output = F.dropout(embedded_output, p=self._dropout, training=self._is_training)
 
         layer_output = self.fc1(embedded_output)
@@ -32,8 +35,12 @@ class ConvDecoder(nn.Module):
         for _ in self._num_layers:
             residual = layer_output
 
-            conv_output = self.conv(layer_output)
-            glu_output = F.glu(conv_output, axis=2)
+            fc1_output = F.dropout(layer_output, p=self._dropout)
+            fc1_output = fc1_output.transpose(1, 2)
+
+            fc1_output = F.pad(fc1_output, (1, 0))
+            conv_output = self.conv(fc1_output)
+            glu_output = F.glu(conv_output, axis=1)
 
             encoder_attention_logits = torch.bmm(glu_output, encoder_attention)
             encoder_attention = F.softmax(encoder_attention_logits)

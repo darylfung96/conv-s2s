@@ -34,16 +34,18 @@ class ConvEncoder(nn.Module):
 
         fc1_output = self.fc1(embedded_input)
 
-        layer_output = embedded_input
+        layer_output = fc1_output
 
         for _ in range(self._num_layers):
             residual_output = layer_output
 
-            fc1_output = F.dropout(fc1_output, p=self._dropout)
+            fc1_output = F.dropout(layer_output, p=self._dropout)
             fc1_output = fc1_output.transpose(1, 2)
-
+            fc1_output = F.pad(fc1_output, (1, 0))
             conv_output = self.conv(fc1_output)
-            glu_output = F.glu(conv_output, 2) #TODO fix this
+
+            glu_output = F.glu(conv_output, 1)
+            glu_output = glu_output.transpose(1, 2)
 
             layer_output = (glu_output + residual_output) * math.sqrt(0.5) # scale value
 
