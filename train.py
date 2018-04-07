@@ -21,8 +21,8 @@ examples_target = [
 ]
 
 
-word_to_index = OrderedDict()
-index_to_word = OrderedDict()
+word_to_index = OrderedDict({'<start>': 1, '<end>': 2})
+index_to_word = OrderedDict({1: '<start>', 2: '<end>'})
 max_length = 0
 
 
