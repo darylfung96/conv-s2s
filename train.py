@@ -35,9 +35,9 @@ for index in range(len(examples)):
 
     for text_index in range(len(splitted)):
         if not word_to_index.get(splitted[text_index]):
-            word_to_index[splitted[text_index]] = len(word_to_index)
-            index_to_word[len(index_to_word)] = splitted[text_index]
-            splitted[text_index] = len(word_to_index)
+            word_to_index[splitted[text_index]] = len(word_to_index)+1
+            index_to_word[len(index_to_word)+1] = splitted[text_index]
+            splitted[text_index] = len(word_to_index)+1
         else:
             splitted[text_index] = word_to_index.get(splitted[text_index])
 
@@ -47,11 +47,14 @@ for index in range(len(examples_target)):
     removed_punc = examples_target[index].translate(examples_target[index].maketrans("", "", string.punctuation))
     splitted = removed_punc.split()
 
+    if len(splitted) > max_length:
+        max_length = len(splitted)
+
     for text_index in range(len(splitted)):
         if not word_to_index.get(splitted[text_index]):
-            word_to_index[splitted[text_index]] = len(word_to_index)
-            index_to_word[len(index_to_word)] = splitted[text_index]
-            splitted[text_index] = len(word_to_index)
+            word_to_index[splitted[text_index]] = len(word_to_index)+1
+            index_to_word[len(index_to_word)+1] = splitted[text_index]
+            splitted[text_index] = len(word_to_index)+1
         else:
             splitted[text_index] = word_to_index.get(splitted[text_index])
 
