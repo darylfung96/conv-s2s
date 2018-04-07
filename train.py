@@ -43,6 +43,11 @@ for index in range(len(examples)):
 
     examples[index] = splitted
 
+    # append end and start token
+    examples[index].append(2)
+    examples[index].insert(0, 1)
+
+
 for index in range(len(examples_target)):
     removed_punc = examples_target[index].translate(examples_target[index].maketrans("", "", string.punctuation))
     splitted = removed_punc.split()
@@ -58,7 +63,11 @@ for index in range(len(examples_target)):
         else:
             splitted[text_index] = word_to_index.get(splitted[text_index])
 
-        examples_target[index] = splitted
+    examples_target[index] = splitted
+
+    # append start and end token
+    examples_target[index].append(2)
+    examples_target[index].insert(0, 1)
 
 
 examples = [np.pad(example, [0, max_length-len(example)], mode='constant') for example in examples]
