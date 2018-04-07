@@ -24,6 +24,7 @@ class ConvDecoder(nn.Module):
         self.fc1 = nn.Linear(embedding_size, hidden_size)
         self.conv = nn.Conv1d(hidden_size, 2 * hidden_size, kernel_size)
         self.fc_conv_embedding = nn.Linear(hidden_size, embedding_size)
+        self.fc_embedding_conv = nn.Linear(embedding_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, embedding_size)
         self.fc3 = nn.Linear(embedding_size, vocab_size)
 
@@ -42,16 +43,17 @@ class ConvDecoder(nn.Module):
             fc1_output = F.pad(fc1_output, (1, 0))
             conv_output = self.conv(fc1_output)
             glu_output = F.glu(conv_output, 1)
-            glu_output = self.fc_conv_embedding(glu_output.transpose(1, 2))
+            post_glu_output = self.fc_conv_embedding(glu_output.transpose(1, 2))
 
-            encoder_attention_logits = torch.bmm(glu_output, encoder_attention.transpose(1,2))
-            encoder_attention = F.softmax(encoder_attention_logits)
+            encoder_attention_logits = torch.bmm(post_glu_output, encoder_attention.transpose(1,2))
+            encoder_attention_output = F.softmax(encoder_attention_logits)
 
-            encoder_attention_output = torch.bmm(encoder_attention, encoder_outputs)
+            attention_output = torch.bmm(encoder_attention_output, encoder_outputs)
             # scale attention output
-            encoder_attention_output = encoder_attention_output * (encoder_outputs.size(2) * math.sqrt(2.0 / encoder_outputs.size(2)))
+            attention_output = attention_output * (encoder_outputs.size(2) * math.sqrt(2.0 / encoder_outputs.size(2)))
+            layer_output = (self.fc_embedding_conv(attention_output).transpose(1, 2) + glu_output) * math.sqrt(0.5)
+            layer_output = layer_output.transpose(1, 2)
 
-            layer_output = (encoder_attention_output + glu_output) * math.sqrt(0.5)
 
         layer_output = (layer_output + residual) * math.sqrt(0.5)
 
