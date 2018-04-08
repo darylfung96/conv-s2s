@@ -12,7 +12,7 @@ class Seq2seq(nn.Module):
     def forward(self, input):
         encoder_output, encoder_attention = self._encoder(input)
 
-        decoder_output = Variable(torch.from_numpy(numpy.array([[0, 0, 0, 0, 0, 0, 0, 1]]*input.shape[0])))
+        decoder_output = Variable(torch.from_numpy(numpy.array([[1]]*input.shape[0])))
         while decoder_output.data[0][-1] != 2:
             decoder_output = self._decoder(decoder_output, encoder_output, encoder_attention)
 

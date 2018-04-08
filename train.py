@@ -23,15 +23,16 @@ examples_target = [
 
 word_to_index = OrderedDict({'<start>': 1, '<end>': 2})
 index_to_word = OrderedDict({1: '<start>', 2: '<end>'})
-max_length = 0
+max_input_length = 0
+max_target_length = 0
 
 
 for index in range(len(examples)):
     removed_punc = examples[index].translate(examples[index].maketrans("", "", string.punctuation))
     splitted = removed_punc.split()
 
-    if len(splitted) > max_length:
-        max_length = len(splitted)
+    if len(splitted) > max_input_length:
+        max_input_length = len(splitted)
 
     for text_index in range(len(splitted)):
         if not word_to_index.get(splitted[text_index]):
@@ -52,8 +53,8 @@ for index in range(len(examples_target)):
     removed_punc = examples_target[index].translate(examples_target[index].maketrans("", "", string.punctuation))
     splitted = removed_punc.split()
 
-    if len(splitted) > max_length:
-        max_length = len(splitted)
+    if len(splitted) > max_target_length:
+        max_target_length = len(splitted)
 
     for text_index in range(len(splitted)):
         if not word_to_index.get(splitted[text_index]):
@@ -69,11 +70,11 @@ for index in range(len(examples_target)):
     examples_target[index].append(2)
     examples_target[index].insert(0, 1)
 
+examples = [np.pad(example, [0, max_input_length+2-len(example)], mode='constant') for example in examples] # + 1 to add the end token
+examples_target =[np.pad(example, [0, max_target_length+2-len(example)], mode='constant') for example in examples_target] # + 1 to add the end token
 
-examples = [np.pad(example, [0, max_length-len(example)], mode='constant') for example in examples]
-
-conv_encoder = ConvEncoder(len(word_to_index), max_length, hidden_size=128, embedding_size=512, kernel_size=2, num_layers=3, dropout=0.5, is_training=True)
-conv_decoder = ConvDecoder(len(word_to_index), max_length, hidden_size=128, embedding_size=512, kernel_size=2, num_layers=3, dropout=0.5, is_training=True)
+conv_encoder = ConvEncoder(len(word_to_index), max_input_length, hidden_size=128, embedding_size=512, kernel_size=2, num_layers=3, dropout=0.5, is_training=True)
+conv_decoder = ConvDecoder(len(word_to_index), max_target_length, hidden_size=128, embedding_size=512, kernel_size=2, num_layers=3, dropout=0.5, is_training=True)
 
 
 import torch
