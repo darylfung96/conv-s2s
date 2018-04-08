@@ -20,7 +20,7 @@ class ConvEncoder(nn.Module):
         self.is_training = is_training
 
         self.embedding = nn.Embedding(vocab_size, self._embedding_size)
-        self.embedding_position = EmbeddingPosition(max_length+3, self._embedding_size) # max_length + 1 to include the padding placeholders
+        self.embedding_position = EmbeddingPosition(vocab_size+3, self._embedding_size) # max_length + 1 to include the padding placeholders
         self.fc1 = nn.Linear(self._embedding_size, self._hidden_size)
         self.fc2 = nn.Linear(self._hidden_size, self._embedding_size)
         self.kernel_size = kernel_size

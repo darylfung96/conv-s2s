@@ -19,7 +19,7 @@ class ConvDecoder(nn.Module):
         self._is_training = is_training
 
         self.embedding = nn.Embedding(vocab_size, self._embedding_size)
-        self.embedding_position = EmbeddingPosition(self._max_length+3, self._embedding_size) # + 1 to include padding which act as none
+        self.embedding_position = EmbeddingPosition(self._vocab_size+3, self._embedding_size) # + 1 to include padding which act as none
 
         self.fc1 = nn.Linear(embedding_size, hidden_size)
         self.conv = nn.Conv1d(hidden_size, 2 * hidden_size, kernel_size)
@@ -29,7 +29,6 @@ class ConvDecoder(nn.Module):
         self.fc3 = nn.Linear(embedding_size, vocab_size)
 
 
-#TODO fix this decoder to do correct bmm
     def forward(self, previous_decoded_input, encoder_outputs, encoder_attention):
         embedded_output = self.embedding(previous_decoded_input) + self.embedding_position(previous_decoded_input)
         embedded_output = F.dropout(embedded_output, p=self._dropout, training=self._is_training)
@@ -56,7 +55,6 @@ class ConvDecoder(nn.Module):
             layer_output = (self.fc_embedding_conv(attention_output).transpose(1, 2) + glu_output) * math.sqrt(0.5)
             layer_output = layer_output.transpose(1, 2)
 
-
         layer_output = (layer_output + residual) * math.sqrt(0.5)
 
         # back to vocab size
@@ -65,5 +63,6 @@ class ConvDecoder(nn.Module):
         fc3_output = self.fc3(fc2_output)
         prob_output = F.log_softmax(fc3_output)
 
+        #TODO fix the output to only output one value instead of the length of the input sequence
 
         return prob_output
