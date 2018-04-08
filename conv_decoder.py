@@ -28,6 +28,8 @@ class ConvDecoder(nn.Module):
         self.fc2 = nn.Linear(hidden_size, embedding_size)
         self.fc3 = nn.Linear(embedding_size, vocab_size)
 
+
+#TODO fix this decoder to do correct bmm
     def forward(self, previous_decoded_input, encoder_outputs, encoder_attention):
         embedded_output = self.embedding(previous_decoded_input) + self.embedding_position(previous_decoded_input)
         embedded_output = F.dropout(embedded_output, p=self._dropout, training=self._is_training)
