@@ -25,6 +25,7 @@ class ConvDecoder(nn.Module):
         self.conv = nn.Conv1d(hidden_size, 2 * hidden_size, kernel_size)
         self.fc_conv_embedding = nn.Linear(hidden_size, embedding_size)
         self.fc_embedding_conv = nn.Linear(embedding_size, hidden_size)
+        self.fc_next_single_char = nn.Linear(4, 1)
         self.fc2 = nn.Linear(hidden_size, embedding_size)
         self.fc3 = nn.Linear(embedding_size, vocab_size)
 
@@ -57,12 +58,13 @@ class ConvDecoder(nn.Module):
 
         layer_output = (layer_output + residual) * math.sqrt(0.5)
 
+        layer_output = self.fc_next_single_char(layer_output.transpose(1,2))
+        layer_output = layer_output.transpose(1, 2)
+
         # back to vocab size
         fc2_output = self.fc2(layer_output)
         fc2_output = F.dropout(fc2_output, p=self._dropout, training=self._is_training)
         fc3_output = self.fc3(fc2_output)
         prob_output = F.log_softmax(fc3_output)
-
-        #TODO fix the output to only output one value instead of the length of the input sequence
 
         return prob_output
