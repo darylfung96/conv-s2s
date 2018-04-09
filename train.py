@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import string
 import numpy as np
+from typing import Union
 
 from seq2seq import Seq2seq
 from conv_encoder import ConvEncoder
@@ -21,10 +22,15 @@ examples_target = [
 ]
 
 
-word_to_index = OrderedDict({'<start>': 1, '<end>': 2})
-index_to_word = OrderedDict({1: '<start>', 2: '<end>'})
+word_to_index = OrderedDict({'<unk>': 0, '<start>': 1, '<end>': 2})
+index_to_word = OrderedDict({0: '<unk>', 1: '<start>', 2: '<end>'})
 max_input_length = 0
 max_target_length = 0
+
+
+def index_to_word_sentence(word_indexes: Union[list, np.ndarray]):
+    return [index_to_word[word_index] for word_index in word_indexes]
+
 
 
 for index in range(len(examples)):
@@ -36,9 +42,9 @@ for index in range(len(examples)):
 
     for text_index in range(len(splitted)):
         if not word_to_index.get(splitted[text_index]):
-            word_to_index[splitted[text_index]] = len(word_to_index)+1
-            index_to_word[len(index_to_word)+1] = splitted[text_index]
-            splitted[text_index] = len(word_to_index)+1
+            word_to_index[splitted[text_index]] = len(word_to_index)
+            index_to_word[len(index_to_word)] = splitted[text_index]
+            splitted[text_index] = len(word_to_index)
         else:
             splitted[text_index] = word_to_index.get(splitted[text_index])
 
@@ -58,9 +64,9 @@ for index in range(len(examples_target)):
 
     for text_index in range(len(splitted)):
         if not word_to_index.get(splitted[text_index]):
-            word_to_index[splitted[text_index]] = len(word_to_index)+1
-            index_to_word[len(index_to_word)+1] = splitted[text_index]
-            splitted[text_index] = len(word_to_index)+1
+            word_to_index[splitted[text_index]] = len(word_to_index)
+            index_to_word[len(index_to_word)] = splitted[text_index]
+            splitted[text_index] = len(word_to_index)
         else:
             splitted[text_index] = word_to_index.get(splitted[text_index])
 
@@ -81,4 +87,6 @@ import torch
 from torch.autograd import Variable
 seq2seq = Seq2seq(conv_encoder, conv_decoder)
 examples = Variable(torch.from_numpy(np.array(examples)))
-seq2seq(examples)
+seq_output = seq2seq(examples)
+seq_output = seq_output.data.numpy()
+sentences = [index_to_word_sentence(seq) for seq in seq_output]

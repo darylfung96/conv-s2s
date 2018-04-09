@@ -47,8 +47,8 @@ class ConvDecoder(nn.Module):
             glu_output = F.glu(conv_output, 1)
             post_glu_output = self.fc_conv_embedding(glu_output.transpose(1, 2))
 
-            encoder_attention_logits = torch.bmm(post_glu_output, encoder_attention.transpose(1,2))
-            encoder_attention_output = F.softmax(encoder_attention_logits)
+            encoder_attention_logits = torch.bmm(post_glu_output, encoder_attention.transpose(1, 2))
+            encoder_attention_output = F.softmax(encoder_attention_logits, 2)
 
             attention_output = torch.bmm(encoder_attention_output, encoder_outputs)
             # scale attention output
@@ -65,6 +65,6 @@ class ConvDecoder(nn.Module):
         fc2_output = self.fc2(layer_output)
         fc2_output = F.dropout(fc2_output, p=self._dropout, training=self._is_training)
         fc3_output = self.fc3(fc2_output)
-        prob_output = F.log_softmax(fc3_output)
+        prob_output = F.log_softmax(fc3_output, 2)
 
         return prob_output
