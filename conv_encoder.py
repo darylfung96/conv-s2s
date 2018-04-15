@@ -31,10 +31,11 @@ class ConvEncoder(nn.Module):
         # embedding
         embedded_input = self.embedding(input) + self.embedding_position(input)
         embedded_input = F.dropout(embedded_input, p=self._dropout, training=self.is_training)
+        embedded_input = embedded_input.unsqueeze(1)
 
         fc1_output = self.fc1(embedded_input)
 
-        layer_output = fc1_output.unsqueeze(1)
+        layer_output = fc1_output
 
         for _ in range(self._num_layers):
             residual_output = layer_output

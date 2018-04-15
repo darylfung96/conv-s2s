@@ -29,7 +29,6 @@ class ConvDecoder(nn.Module):
         self.fc2 = nn.Linear(hidden_size, embedding_size)
         self.fc3 = nn.Linear(embedding_size, vocab_size)
 
-
     def forward(self, previous_decoded_input, encoder_outputs, encoder_attention):
         embedded_output = self.embedding(previous_decoded_input) + self.embedding_position(previous_decoded_input)
         embedded_output = F.dropout(embedded_output, p=self._dropout, training=self._is_training)
@@ -47,20 +46,16 @@ class ConvDecoder(nn.Module):
 
             glu_output = F.glu(conv_output, 3)
             post_glu_output = self.fc_conv_embedding(glu_output)
-            #TODO fix me
-            encoder_attention_logits = torch.bmm(post_glu_output, encoder_attention.transpose(1, 2))
+
+            encoder_attention_logits = torch.bmm(post_glu_output.squeeze(1), encoder_attention.transpose(2, 3).squeeze(1))
             encoder_attention_output = F.softmax(encoder_attention_logits, 2)
 
-            attention_output = torch.bmm(encoder_attention_output, encoder_outputs)
+            attention_output = torch.bmm(encoder_attention_output, encoder_outputs.squeeze(1))
             # scale attention output
-            attention_output = attention_output * (encoder_outputs.size(2) * math.sqrt(2.0 / encoder_outputs.size(2)))
-            layer_output = (self.fc_embedding_conv(attention_output).transpose(1, 2) + glu_output) * math.sqrt(0.5)
-            layer_output = layer_output.transpose(1, 2)
+            attention_output = attention_output * (encoder_outputs.size(3) * math.sqrt(2.0 / encoder_outputs.size(3)))
+            layer_output = (self.fc_embedding_conv(attention_output).unsqueeze(1) + glu_output) * math.sqrt(0.5)
 
         layer_output = (layer_output + residual) * math.sqrt(0.5)
-
-        layer_output = self.fc_next_single_char(layer_output.transpose(1,2))
-        layer_output = layer_output.transpose(1, 2)
 
         # back to vocab size
         fc2_output = self.fc2(layer_output)
