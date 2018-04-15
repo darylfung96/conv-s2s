@@ -9,10 +9,11 @@ class Seq2seq(nn.Module):
         self._encoder = encoder
         self._decoder = decoder
 
-    def forward(self, input):
+    def forward(self, input, target):
         encoder_output, encoder_attention = self._encoder(input)
 
-        decoder_whole_output = Variable(torch.from_numpy(numpy.array([[0, 0, 0, 1]]*input.shape[0])))
+        # decoder_whole_output = Variable(torch.from_numpy(numpy.array([[0, 0, 0, 1]]*input.shape[0])))
+        decoder_whole_output = Variable(torch.from_numpy(numpy.array(target)))
         iteration = 0
         while any(decoder_whole_output.data[:][-1]) != 2 and iteration < 15:
             decoder_output = self._decoder(decoder_whole_output[:, -4:], encoder_output, encoder_attention)

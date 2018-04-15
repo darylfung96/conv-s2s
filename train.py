@@ -87,7 +87,7 @@ import torch
 from torch.autograd import Variable
 seq2seq = Seq2seq(conv_encoder, conv_decoder)
 examples = Variable(torch.from_numpy(np.array(examples)))
-seq_output = seq2seq(examples)
+seq_output = seq2seq(examples, examples_target)
 seq_output = seq_output.data.numpy()
 sentences = [index_to_word_sentence(seq) for seq in seq_output]
 print(sentences)
