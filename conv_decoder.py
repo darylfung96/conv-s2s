@@ -7,22 +7,22 @@ from embedding_position import EmbeddingPosition
 
 
 class ConvDecoder(nn.Module):
-    def __init__(self, vocab_size, max_length, hidden_size, embedding_size, kernel_size, num_layers, dropout, is_training):
+    def __init__(self, vocab_size, max_length, hidden_size, embedding_size, num_layers, dropout, is_training):
         super(ConvDecoder, self).__init__()
         self._vocab_size = vocab_size
         self._max_length = max_length
         self._hidden_size = hidden_size
         self._embedding_size = embedding_size
-        self._kernel_size = kernel_size
+        self._kernel_size = (3, self._hidden_size)
         self._num_layers = num_layers
         self._dropout = dropout
         self._is_training = is_training
 
-        self.embedding = nn.Embedding(vocab_size, self._embedding_size)
+        self.embedding = nn.Embedding(vocab_size+3, self._embedding_size)
         self.embedding_position = EmbeddingPosition(self._vocab_size+3, self._embedding_size) # + 1 to include padding which act as none
 
         self.fc1 = nn.Linear(embedding_size, hidden_size)
-        self.conv = nn.Conv1d(hidden_size, 2 * hidden_size, kernel_size)
+        self.conv = nn.Conv2d(1, 2 * hidden_size, self._kernel_size, padding=(self._kernel_size[0]-1, 0))
         self.fc_conv_embedding = nn.Linear(hidden_size, embedding_size)
         self.fc_embedding_conv = nn.Linear(embedding_size, hidden_size)
         self.fc_next_single_char = nn.Linear(4, 1)
@@ -34,19 +34,20 @@ class ConvDecoder(nn.Module):
         embedded_output = self.embedding(previous_decoded_input) + self.embedding_position(previous_decoded_input)
         embedded_output = F.dropout(embedded_output, p=self._dropout, training=self._is_training)
 
-        layer_output = self.fc1(embedded_output)
+        layer_output = self.fc1(embedded_output).unsqueeze(1)
 
         residual = layer_output
         for _ in range(self._num_layers):
 
             fc1_output = F.dropout(layer_output, p=self._dropout)
-            fc1_output = fc1_output.transpose(1, 2)
 
-            fc1_output = F.pad(fc1_output, (1, 0))
             conv_output = self.conv(fc1_output)
-            glu_output = F.glu(conv_output, 1)
-            post_glu_output = self.fc_conv_embedding(glu_output.transpose(1, 2))
+            conv_output = conv_output.narrow(2, 0, conv_output.size(2)-self._kernel_size[0])
+            conv_output = conv_output.transpose(1, 3)
 
+            glu_output = F.glu(conv_output, 3)
+            post_glu_output = self.fc_conv_embedding(glu_output)
+            #TODO fix me
             encoder_attention_logits = torch.bmm(post_glu_output, encoder_attention.transpose(1, 2))
             encoder_attention_output = F.softmax(encoder_attention_logits, 2)
 

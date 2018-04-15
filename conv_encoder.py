@@ -8,7 +8,7 @@ from embedding_position import EmbeddingPosition
 
 class ConvEncoder(nn.Module):
 
-    def __init__(self, vocab_size, max_length, hidden_size, embedding_size, kernel_size, num_layers, dropout, is_training):
+    def __init__(self, vocab_size, max_length, hidden_size, embedding_size, num_layers, dropout, is_training):
         super(ConvEncoder, self).__init__()
 
         self._embedding_size = embedding_size
@@ -23,8 +23,8 @@ class ConvEncoder(nn.Module):
         self.embedding_position = EmbeddingPosition(vocab_size+3, self._embedding_size) # max_length + 1 to include the padding placeholders
         self.fc1 = nn.Linear(self._embedding_size, self._hidden_size)
         self.fc2 = nn.Linear(self._hidden_size, self._embedding_size)
-        self.kernel_size = kernel_size
-        self.conv = nn.Conv1d(hidden_size, self._conv_out_channels, kernel_size) #fixme change convolution 1d to 2d so we can parallelize the training
+        self.kernel_size = (3, self._hidden_size)
+        self.conv = nn.Conv2d(1, self._conv_out_channels, self.kernel_size, padding=((self.kernel_size[0]-1)//2, 0)) #fixme change convolution 1d to 2d so we can parallelize the training
 
     def forward(self, input):
 
@@ -34,18 +34,15 @@ class ConvEncoder(nn.Module):
 
         fc1_output = self.fc1(embedded_input)
 
-        layer_output = fc1_output
+        layer_output = fc1_output.unsqueeze(1)
 
         for _ in range(self._num_layers):
             residual_output = layer_output
 
             fc1_output = F.dropout(layer_output, p=self._dropout)
-            fc1_output = fc1_output.transpose(1, 2)
-            fc1_output = F.pad(fc1_output, (1, 0))
-            conv_output = self.conv(fc1_output)
+            conv_output = self.conv(fc1_output).transpose(1, 3)
 
-            glu_output = F.glu(conv_output, 1)
-            glu_output = glu_output.transpose(1, 2)
+            glu_output = F.glu(conv_output, 3)
 
             layer_output = (glu_output + residual_output) * math.sqrt(0.5) # scale value
 
