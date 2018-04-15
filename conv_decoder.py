@@ -41,7 +41,7 @@ class ConvDecoder(nn.Module):
             fc1_output = F.dropout(layer_output, p=self._dropout)
 
             conv_output = self.conv(fc1_output)
-            conv_output = conv_output.narrow(2, 0, conv_output.size(2)-self._kernel_size[0])
+            conv_output = conv_output.narrow(2, 0, conv_output.size(2)-self._kernel_size[0]+1)
             conv_output = conv_output.transpose(1, 3)
 
             glu_output = F.glu(conv_output, 3)

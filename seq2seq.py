@@ -16,7 +16,7 @@ class Seq2seq(nn.Module):
         decoder_whole_output = Variable(torch.from_numpy(numpy.array(target)))
         iteration = 0
         while any(decoder_whole_output.data[:][-1]) != 2 and iteration < 15:
-            decoder_output = self._decoder(decoder_whole_output[:, -4:], encoder_output, encoder_attention)
+            decoder_output = self._decoder(decoder_whole_output, encoder_output, encoder_attention)
             next_decoder_output = torch.max(decoder_output, 2)[1] # get the highest probability for the next word
             decoder_whole_output = torch.cat((decoder_whole_output, next_decoder_output), 1)
             iteration += 1
