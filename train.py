@@ -82,11 +82,10 @@ examples_target =[np.pad(example, [0, max_target_length+2-len(example)], mode='c
 conv_encoder = ConvEncoder(len(word_to_index), max_input_length, hidden_size=128, embedding_size=512, num_layers=3, dropout=0.5, is_training=True)
 conv_decoder = ConvDecoder(len(word_to_index), max_target_length, hidden_size=128, embedding_size=512, num_layers=3, dropout=0.5, is_training=True)
 
+examples = np.array(examples)
+examples_target = np.array(examples_target)
 
-import torch
-from torch.autograd import Variable
 seq2seq = Seq2seq(conv_encoder, conv_decoder)
-examples = Variable(torch.from_numpy(np.array(examples)))
 seq_output = seq2seq(examples, examples_target)
 seq_output = seq_output.data.numpy()
 sentences = [index_to_word_sentence(seq) for seq in seq_output]

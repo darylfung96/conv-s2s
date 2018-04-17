@@ -8,23 +8,27 @@ class Seq2seq(nn.Module):
         super(Seq2seq, self).__init__()
         self._encoder = encoder
         self._decoder = decoder
+        self.criterion = nn.NLLLoss()
 
     def forward(self, inputs, target=None, is_training=True):
+        inputs = Variable(torch.from_numpy(inputs))
+
         if is_training:
             if target is None:
                 raise ValueError("target parameter has to be passed with value.")
+            target = target[:, 1:]
+            target = Variable(torch.from_numpy(target))
             return self.start_train(inputs, target)
         else:
             return self.start_eval(inputs)
 
     def start_train(self, inputs, target):
         encoder_output, encoder_attention = self._encoder(inputs)
+        decoder_input = target
+        decoder_output = self._decoder(decoder_input, encoder_output, encoder_attention)
+        #TODO fix loss
+        self.criterion(decoder_output, target)
 
-        decoder_inputs = Variable(torch.from_numpy(numpy.array(target)))
-        decoder_output = self._decoder(decoder_inputs, encoder_output, encoder_attention)
-
-        #TODO do loss criterion with target and predicted output
-        pass
 
     def start_eval(self, input):
         encoder_output, encoder_attention = self._encoder(input)
