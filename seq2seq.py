@@ -9,16 +9,16 @@ class Seq2seq(nn.Module):
         self._encoder = encoder
         self._decoder = decoder
 
-    def forward(self, input, target=None, is_training=True):
+    def forward(self, inputs, target=None, is_training=True):
         if is_training:
             if target is None:
                 raise ValueError("target parameter has to be passed with value.")
-            return self.start_train(input, target)
+            return self.start_train(inputs, target)
         else:
-            return self.start_eval(input)
+            return self.start_eval(inputs)
 
-    def start_train(self, input, target):
-        encoder_output, encoder_attention = self._encoder(input)
+    def start_train(self, inputs, target):
+        encoder_output, encoder_attention = self._encoder(inputs)
 
         decoder_inputs = Variable(torch.from_numpy(numpy.array(target)))
         decoder_output = self._decoder(decoder_inputs, encoder_output, encoder_attention)

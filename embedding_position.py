@@ -9,14 +9,14 @@ class EmbeddingPosition(nn.Embedding):
 
     def forward(self, inputs: Variable):
 
+        inputs_position = torch.zeros_like(inputs)
+
         for row_index in range(len(inputs.data)):
             for col_index in range(len(inputs.data[row_index])):
                 # change the value to the absolute position
                 if inputs.data[row_index][col_index] != 0:
-                    inputs.data[row_index][col_index] = col_index+1
+                    inputs_position.data[row_index][col_index] = col_index+1
                 else:
                     break
 
-
-
-        return super(EmbeddingPosition, self).forward(inputs)
+        return super(EmbeddingPosition, self).forward(inputs_position)

@@ -26,10 +26,10 @@ class ConvEncoder(nn.Module):
         self.kernel_size = (3, self._hidden_size)
         self.conv = nn.Conv2d(1, self._conv_out_channels, self.kernel_size, padding=((self.kernel_size[0]-1)//2, 0)) #fixme change convolution 1d to 2d so we can parallelize the training
 
-    def forward(self, input):
+    def forward(self, inputs):
 
         # embedding
-        embedded_input = self.embedding(input) + self.embedding_position(input)
+        embedded_input = self.embedding(inputs) + self.embedding_position(inputs)
         embedded_input = F.dropout(embedded_input, p=self._dropout, training=self.is_training)
         embedded_input = embedded_input.unsqueeze(1)
 

@@ -76,8 +76,8 @@ for index in range(len(examples_target)):
     examples_target[index].append(2)
     examples_target[index].insert(0, 1)
 
-examples = [np.pad(example, [max_input_length+2-len(example), 0], mode='constant') for example in examples] # + 1 to add the end token
-examples_target =[np.pad(example, [max_target_length+2-len(example), 0], mode='constant') for example in examples_target] # + 1 to add the end token
+examples = [np.pad(example, [0, max_input_length+2-len(example)], mode='constant') for example in examples] # + 1 to add the end token
+examples_target =[np.pad(example, [0, max_target_length+2-len(example)], mode='constant') for example in examples_target] # + 1 to add the end token
 
 conv_encoder = ConvEncoder(len(word_to_index), max_input_length, hidden_size=128, embedding_size=512, num_layers=3, dropout=0.5, is_training=True)
 conv_decoder = ConvDecoder(len(word_to_index), max_target_length, hidden_size=128, embedding_size=512, num_layers=3, dropout=0.5, is_training=True)
