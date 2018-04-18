@@ -66,7 +66,7 @@ for index in range(len(examples_target)):
         if not word_to_index.get(splitted[text_index]):
             word_to_index[splitted[text_index]] = len(word_to_index)
             index_to_word[len(index_to_word)] = splitted[text_index]
-            splitted[text_index] = len(word_to_index)
+            splitted[text_index] = word_to_index[splitted[text_index]]
         else:
             splitted[text_index] = word_to_index.get(splitted[text_index])
 
@@ -85,7 +85,7 @@ conv_decoder = ConvDecoder(len(word_to_index), max_target_length, hidden_size=12
 examples = np.array(examples)
 examples_target = np.array(examples_target)
 
-seq2seq = Seq2seq(conv_encoder, conv_decoder)
+seq2seq = Seq2seq(conv_encoder, conv_decoder, len(word_to_index))
 seq_output = seq2seq(examples, examples_target)
 seq_output = seq_output.data.numpy()
 sentences = [index_to_word_sentence(seq) for seq in seq_output]

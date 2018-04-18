@@ -4,10 +4,11 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 class Seq2seq(nn.Module):
-    def __init__(self, encoder, decoder):
+    def __init__(self, encoder, decoder, vocab_size):
         super(Seq2seq, self).__init__()
         self._encoder = encoder
         self._decoder = decoder
+        self._vocab_size = vocab_size
         self.criterion = nn.NLLLoss()
 
     def forward(self, inputs, target=None, is_training=True):
@@ -26,8 +27,15 @@ class Seq2seq(nn.Module):
         encoder_output, encoder_attention = self._encoder(inputs)
         decoder_input = target
         decoder_output = self._decoder(decoder_input, encoder_output, encoder_attention)
+        decoder_output = decoder_output.squeeze(1)
+
+        one_hot_target = torch.LongTensor(target.size(0), target.size(1), self._vocab_size).zero_()
+        target_reshaped = target.contiguous().view(target.size(0), target.size(1), 1)
+        one_hot_target.scatter_(2, target_reshaped.data, 1)
+        one_hot_target = Variable(one_hot_target)
+
         #TODO fix loss
-        self.criterion(decoder_output, target)
+        self.criterion(decoder_output, one_hot_target)
 
 
     def start_eval(self, input):
