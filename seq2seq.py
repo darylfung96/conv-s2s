@@ -2,6 +2,7 @@ import numpy
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
+import torch.optim as optim
 
 class Seq2seq(nn.Module):
     def __init__(self, encoder, decoder, vocab_size):
@@ -10,6 +11,7 @@ class Seq2seq(nn.Module):
         self._decoder = decoder
         self._vocab_size = vocab_size
         self.criterion = nn.NLLLoss()
+        self.optim = optim.Adam(self.parameters(), lr=0.001)
 
     def forward(self, inputs, target=None, is_training=True):
         inputs = Variable(torch.from_numpy(inputs))
@@ -24,21 +26,20 @@ class Seq2seq(nn.Module):
             return self.start_eval(inputs)
 
     def start_train(self, inputs, target):
-        encoder_output, encoder_attention = self._encoder(inputs)
-        decoder_input = target
-        decoder_output = self._decoder(decoder_input, encoder_output, encoder_attention)
-        decoder_output = decoder_output.squeeze(1)
 
-        one_hot_target = torch.LongTensor(target.size(0), target.size(1), self._vocab_size).zero_()
-        target_reshaped = target.contiguous().view(target.size(0), target.size(1), 1)
-        one_hot_target.scatter_(2, target_reshaped.data, 1)
-        one_hot_target = Variable(one_hot_target)
+        for i in range(100):
+            encoder_output, encoder_attention = self._encoder(inputs)
+            decoder_input = target
+            decoder_output = self._decoder(decoder_input, encoder_output, encoder_attention)
+            decoder_output = decoder_output.squeeze(1)
 
-        loss = None
-        for index in range(decoder_output.size(0)):
-            loss = loss + self.criterion(decoder_output[index], target[index]) if loss is not None else self.criterion(decoder_output[index], target[index])
-
-        loss.backward()
+            loss = None
+            self.optim.zero_grad()
+            for index in range(decoder_output.size(0)):
+                loss = loss + self.criterion(decoder_output[index], target[index]) if loss is not None else self.criterion(decoder_output[index], target[index])
+            print(loss)
+            loss.backward()
+            self.optim.step()
 
 
     def start_eval(self, input):
