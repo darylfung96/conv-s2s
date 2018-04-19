@@ -22,8 +22,8 @@ examples_target = [
 ]
 
 
-word_to_index = OrderedDict({'<unk>': 0, '<start>': 1, '<end>': 2})
-index_to_word = OrderedDict({0: '<unk>', 1: '<start>', 2: '<end>'})
+word_to_index = OrderedDict({'<unk>': 0, '<end>': 1})
+index_to_word = OrderedDict({0: '<unk>', 1: '<end>'})
 max_input_length = 0
 max_target_length = 0
 
@@ -52,7 +52,6 @@ for index in range(len(examples)):
 
     # append end and start token
     examples[index].append(2)
-    examples[index].insert(0, 1)
 
 
 for index in range(len(examples_target)):

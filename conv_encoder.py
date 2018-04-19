@@ -24,7 +24,7 @@ class ConvEncoder(nn.Module):
         self.fc1 = nn.Linear(self._embedding_size, self._hidden_size)
         self.fc2 = nn.Linear(self._hidden_size, self._embedding_size)
         self.kernel_size = (3, self._hidden_size)
-        self.conv = nn.Conv2d(1, self._conv_out_channels, self.kernel_size, padding=((self.kernel_size[0]-1)//2, 0)) #fixme change convolution 1d to 2d so we can parallelize the training
+        self.conv = nn.Conv2d(1, self._conv_out_channels, self.kernel_size, padding=((self.kernel_size[0]-1)//2, 0))
 
     def forward(self, inputs):
 
