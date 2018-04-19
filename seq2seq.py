@@ -34,8 +34,11 @@ class Seq2seq(nn.Module):
         one_hot_target.scatter_(2, target_reshaped.data, 1)
         one_hot_target = Variable(one_hot_target)
 
-        #TODO fix loss
-        self.criterion(decoder_output, one_hot_target)
+        loss = None
+        for index in range(decoder_output.size(0)):
+            loss = loss + self.criterion(decoder_output[index], target[index]) if loss is not None else self.criterion(decoder_output[index], target[index])
+
+        loss.backward()
 
 
     def start_eval(self, input):
