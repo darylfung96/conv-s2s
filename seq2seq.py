@@ -27,7 +27,7 @@ class Seq2seq(nn.Module):
 
     def start_train(self, inputs, target):
 
-        for i in range(1000):
+        for i in range(300):
             encoder_output, encoder_attention = self._encoder(inputs)
             decoder_input = target
             decoder_output = self._decoder(decoder_input, encoder_output, encoder_attention)
@@ -36,10 +36,10 @@ class Seq2seq(nn.Module):
             loss = None
             self.optim.zero_grad()
             for index in range(decoder_output.size(0)):
-                loss = loss + self.criterion(decoder_output[index], target[index]) if loss is not None else self.criterion(decoder_output[index], target[index])
-            print(loss)
-            loss.backward()
+                loss = self.criterion(decoder_output[index], target[index]).backward(retain_graph=True)
             self.optim.step()
+
+        return torch.max(decoder_output, 2)[1]
 
 
     def start_eval(self, input):
