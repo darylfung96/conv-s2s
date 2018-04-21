@@ -91,6 +91,7 @@ seq_output = seq_output.data.numpy()
 sentences = [index_to_word_sentence(seq) for seq in seq_output]
 print(sentences)
 
+#TODO fix evaluation for seq2seq
 new_text = input('type in text to predict:')
 new_text_token = np.array([[word_to_index[token] for token in new_text.lower().split()]])
 outputs = seq2seq(new_text_token, is_training=False)
