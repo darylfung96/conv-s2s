@@ -19,7 +19,7 @@ class ConvDecoder(nn.Module):
         self._is_training = is_training
 
         self.embedding = nn.Embedding(vocab_size+3, self._embedding_size)
-        self.embedding_position = EmbeddingPosition(self._vocab_size+3, self._embedding_size) # + 1 to include padding which act as none
+        self.embedding_position = EmbeddingPosition(max_length, self._embedding_size) # + 1 to include padding which act as none
 
         self.fc1 = nn.Linear(embedding_size, hidden_size)
         self.conv = nn.Conv2d(1, 2 * hidden_size, self._kernel_size, padding=(self._kernel_size[0]-1, 0))
@@ -61,6 +61,6 @@ class ConvDecoder(nn.Module):
         fc2_output = self.fc2(layer_output)
         fc2_output = F.dropout(fc2_output, p=self._dropout, training=self._is_training)
         fc3_output = self.fc3(fc2_output)
-        prob_output = F.log_softmax(fc3_output, 2)
+        prob_output = F.log_softmax(fc3_output, 3)
 
         return prob_output

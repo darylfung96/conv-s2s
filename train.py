@@ -78,8 +78,8 @@ for index in range(len(examples_target)):
 examples = [np.pad(example, [0, max_input_length+2-len(example)], mode='constant') for example in examples] # + 1 to add the end token
 examples_target =[np.pad(example, [0, max_target_length+2-len(example)], mode='constant') for example in examples_target] # + 1 to add the end token
 
-conv_encoder = ConvEncoder(len(word_to_index), max_input_length, hidden_size=128, embedding_size=512, num_layers=1, dropout=0, is_training=True)
-conv_decoder = ConvDecoder(len(word_to_index), max_target_length, hidden_size=128, embedding_size=512, num_layers=1, dropout=0, is_training=True)
+conv_encoder = ConvEncoder(len(word_to_index), max_input_length+2, hidden_size=128, embedding_size=512, num_layers=1, dropout=0, is_training=True)
+conv_decoder = ConvDecoder(len(word_to_index), max_target_length+2, hidden_size=128, embedding_size=512, num_layers=1, dropout=0, is_training=True)
 
 examples = np.array(examples)
 examples_target = np.array(examples_target)
@@ -91,7 +91,7 @@ seq_output = seq_output.data.numpy()
 sentences = [index_to_word_sentence(seq) for seq in seq_output]
 print(sentences)
 
-#TODO fix evaluation for seq2seq
+#TODO fix evaluation keep showing end end
 new_text = input('type in text to predict:')
 new_text_token = np.array([[word_to_index[token] for token in new_text.lower().split()]])
 outputs = seq2seq(new_text_token, is_training=False)

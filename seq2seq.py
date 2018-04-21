@@ -48,7 +48,7 @@ class Seq2seq(nn.Module):
         decoder_inputs = Variable(torch.from_numpy(numpy.array([[1]] * encoder_output.size(0))))
         next_decoder_output = None
 
-        while next_decoder_output is None or next_decoder_output.data[0][0] is not 1:
+        while (next_decoder_output is None or next_decoder_output.data[0][0] is not 1) and len(decoder_inputs.data[0]) < self._decoder._max_length:
             decoder_output = self._decoder(decoder_inputs, encoder_output, encoder_attention)
             next_decoder_output = torch.max(decoder_output, 3)[1][:, :, -1]
             decoder_inputs = torch.cat([decoder_inputs, next_decoder_output], dim=1)
