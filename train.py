@@ -90,3 +90,10 @@ seq_output = seq2seq(examples, examples_target)
 seq_output = seq_output.data.numpy()
 sentences = [index_to_word_sentence(seq) for seq in seq_output]
 print(sentences)
+
+new_text = input('type in text to predict:')
+new_text_token = np.array([[word_to_index[token] for token in new_text.lower().split()]])
+outputs = seq2seq(new_text_token, is_training=False)
+outputs = outputs.data.numpy()
+sentences = [index_to_word_sentence(seq) for seq in outputs]
+print(sentences)
