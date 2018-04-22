@@ -78,8 +78,8 @@ for index in range(len(examples_target)):
 examples = [np.pad(example, [0, max_input_length+2-len(example)], mode='constant') for example in examples] # + 2 to add the end token and the padding token
 examples_target =[np.pad(example, [0, max_target_length+2-len(example)], mode='constant') for example in examples_target] # + 1 to add the end token and the padding token
 
-conv_encoder = ConvEncoder(len(word_to_index), max_input_length+2, hidden_size=128, embedding_size=512, num_layers=2, dropout=0, is_training=True)
-conv_decoder = ConvDecoder(len(word_to_index), max_target_length+2, hidden_size=128, embedding_size=512, num_layers=2, dropout=0, is_training=True)
+conv_encoder = ConvEncoder(len(word_to_index), max_input_length+2, hidden_size=128, embedding_size=512, num_layers=1, dropout=0, is_training=True)
+conv_decoder = ConvDecoder(len(word_to_index), max_target_length+2, hidden_size=128, embedding_size=512, num_layers=1, dropout=0, is_training=True)
 
 examples = np.array(examples)
 examples_target = np.array(examples_target)
@@ -91,12 +91,13 @@ seq_output = seq_output.data.numpy()
 sentences = [index_to_word_sentence(seq) for seq in seq_output]
 print(sentences)
 
-#TODO fix evaluation keep showing end end
-new_text = input('type in text to predict:')
-new_text_token = np.array([[word_to_index[token] for token in new_text.lower().split()]])
-new_text_token = np.concatenate([new_text_token, [[1]]], axis=1)
 
-outputs = seq2seq(examples, is_training=False)
-outputs = outputs.data.numpy()
-sentences = [index_to_word_sentence(seq) for seq in outputs]
-print(sentences)
+while True:
+    new_text = input('type in text to predict:')
+    new_text_token = np.array([[word_to_index[token] for token in new_text.lower().split()]])
+    new_text_token = np.concatenate([new_text_token, [[1]]], axis=1)
+
+    outputs = seq2seq(new_text_token, is_training=False)
+    outputs = outputs.data.numpy()
+    sentences = [index_to_word_sentence(seq) for seq in outputs]
+    print(sentences)
