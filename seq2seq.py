@@ -27,7 +27,7 @@ class Seq2seq(nn.Module):
 
     def start_train(self, inputs, target):
 
-        for i in range(300):
+        for i in range(1000):
             encoder_output, encoder_attention = self._encoder(inputs)
             decoder_input = target
             decoder_output = self._decoder(decoder_input, encoder_output, encoder_attention)

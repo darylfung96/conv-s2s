@@ -44,7 +44,7 @@ for index in range(len(examples)):
         if not word_to_index.get(splitted[text_index]):
             word_to_index[splitted[text_index]] = len(word_to_index)
             index_to_word[len(index_to_word)] = splitted[text_index]
-            splitted[text_index] = len(word_to_index)
+            splitted[text_index] = word_to_index[splitted[text_index]]
         else:
             splitted[text_index] = word_to_index.get(splitted[text_index])
 
@@ -94,7 +94,9 @@ print(sentences)
 #TODO fix evaluation keep showing end end
 new_text = input('type in text to predict:')
 new_text_token = np.array([[word_to_index[token] for token in new_text.lower().split()]])
-outputs = seq2seq(new_text_token, is_training=False)
+new_text_token = np.concatenate([new_text_token, [[1]]], axis=1)
+
+outputs = seq2seq(examples, is_training=False)
 outputs = outputs.data.numpy()
 sentences = [index_to_word_sentence(seq) for seq in outputs]
 print(sentences)
