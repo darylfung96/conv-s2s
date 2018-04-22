@@ -14,9 +14,7 @@ class EmbeddingPosition(nn.Embedding):
         for row_index in range(len(inputs.data)):
             for col_index in range(len(inputs.data[row_index])):
                 # change the value to the absolute position
-                if inputs.data[row_index][col_index] != 0:
-                    inputs_position.data[row_index][col_index] = col_index+1
-                else:
-                    break
+                # if inputs.data[row_index][col_index] != 0:
+                inputs_position.data[row_index][col_index] = col_index
 
         return super(EmbeddingPosition, self).forward(inputs_position)

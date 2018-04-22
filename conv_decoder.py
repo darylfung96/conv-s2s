@@ -13,7 +13,7 @@ class ConvDecoder(nn.Module):
         self._max_length = max_length
         self._hidden_size = hidden_size
         self._embedding_size = embedding_size
-        self._kernel_size = (3, self._hidden_size)
+        self._kernel_size = (5, self._hidden_size)
         self._num_layers = num_layers
         self._dropout = dropout
         self._is_training = is_training
@@ -25,7 +25,6 @@ class ConvDecoder(nn.Module):
         self.conv = nn.Conv2d(1, 2 * hidden_size, self._kernel_size, padding=(self._kernel_size[0]-1, 0))
         self.fc_conv_embedding = nn.Linear(hidden_size, embedding_size)
         self.fc_embedding_conv = nn.Linear(embedding_size, hidden_size)
-        self.fc_next_single_char = nn.Linear(4, 1)
         self.fc2 = nn.Linear(hidden_size, embedding_size)
         self.fc3 = nn.Linear(embedding_size, vocab_size)
 

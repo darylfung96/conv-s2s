@@ -19,7 +19,6 @@ class Seq2seq(nn.Module):
         if is_training:
             if target is None:
                 raise ValueError("target parameter has to be passed with value.")
-            target = target[:, 1:]
             target = Variable(torch.from_numpy(target))
             return self.start_train(inputs, target)
         else:
@@ -27,16 +26,19 @@ class Seq2seq(nn.Module):
 
     def start_train(self, inputs, target):
 
-        for i in range(1000):
+
+
+        for i in range(100):
             encoder_output, encoder_attention = self._encoder(inputs)
-            decoder_input = target
+            decoder_input = target[:, :-1]
+            train_target = target[:, 1:]
             decoder_output = self._decoder(decoder_input, encoder_output, encoder_attention)
             decoder_output = decoder_output.squeeze(1)
 
             loss = None
             self.optim.zero_grad()
             for index in range(decoder_output.size(0)):
-                loss = self.criterion(decoder_output[index], target[index]).backward(retain_graph=True)
+                loss = self.criterion(decoder_output[index], train_target[index]).backward(retain_graph=True)
             self.optim.step()
 
         return torch.max(decoder_output, 2)[1]
