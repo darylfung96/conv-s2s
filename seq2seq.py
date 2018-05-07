@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.optim as optim
 
+
 class Seq2seq(nn.Module):
     def __init__(self, encoder, decoder, vocab_size):
         super(Seq2seq, self).__init__()
@@ -26,8 +27,6 @@ class Seq2seq(nn.Module):
 
     def start_train(self, inputs, target):
 
-
-
         for i in range(100):
             encoder_output, encoder_attention = self._encoder(inputs)
             decoder_input = target[:, :-1]
@@ -35,14 +34,16 @@ class Seq2seq(nn.Module):
             decoder_output = self._decoder(decoder_input, encoder_output, encoder_attention)
             decoder_output = decoder_output.squeeze(1)
 
-            loss = None
+            loss = 0
             self.optim.zero_grad()
             for index in range(decoder_output.size(0)):
-                loss = self.criterion(decoder_output[index], train_target[index]).backward(retain_graph=True)
+                loss += self.criterion(decoder_output[index], train_target[index])
+                loss.backward(retain_graph=True)
             self.optim.step()
+            average_loss = loss / decoder_output.size(0)
+            print('average loss per batch: {}'.format(average_loss))
 
         return torch.max(decoder_output, 2)[1]
-
 
     def start_eval(self, input):
         encoder_output, encoder_attention = self._encoder(input)
@@ -55,4 +56,5 @@ class Seq2seq(nn.Module):
             next_decoder_output = torch.max(decoder_output, 3)[1][:, :, -1]
             decoder_inputs = torch.cat([decoder_inputs, next_decoder_output], dim=1)
 
-        return decoder_inputs
+
+        return decoder_inputs[:, 1:]
