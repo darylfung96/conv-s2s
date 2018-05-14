@@ -7,11 +7,3 @@ Instead of using recurrent neural network, this paper uses convolutional to lear
 time for convolution will be faster than of recurrent because of its power in parallelism. To try out convolutional network for sequence
 to sequence learning. I decided to try and reimplement the model.
 
-
-
-TODO:
-- Decoder(halfway)
-- Data gathering
-- Data preprocess
-- train
-- evaluation
